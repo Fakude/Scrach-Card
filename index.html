@@ -582,11 +582,11 @@ async function flashTorch(){
     // Flash pattern matching "I LOVE YOU" vibration timing
     // [200ms ON, 100ms OFF, 200ms ON, 100ms OFF, 600ms ON, 100ms OFF, 200ms ON, 100ms OFF, 200ms ON]
     const flashPattern = [
-      { on: 1000, off: 500 },  // I
-      { on: 1000, off: 500 },  // LOVE (first part)
-      { on: 3000, off: 500 },  // LOVE (long)
-      { on: 1000, off: 500 },  // YOU (first part)
-      { on: 1000, off: 0 }     // YOU (end)
+      { on: 500, off: 250 },  // I
+      { on: 500, off: 250 },  // LOVE (first part)
+      { on: 1500, off: 250 },  // LOVE (long)
+      { on: 500, off: 250 },  // YOU (first part)
+      { on: 500, off: 0 }     // YOU (end)
     ];
     
     let delay = 0;
