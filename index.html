@@ -2,25 +2,35 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Special Valentine's Day Message for Abongile 💖">
+<meta name="theme-color" content="#ff2d55">
 <title>Valentine Scratch 💖</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 html,body{
   margin:0;
   padding:0;
   height:100%;
+  width:100%;
   overflow:hidden;
-  font-family:'Segoe UI',sans-serif;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background:#fff;
   text-align:center;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
 /* ---------- Scratch Card ---------- */
 #card{
-  width:320px;
-  height:200px;
-  margin:100px auto 20px;
+  width:min(320px, 90vw);
+  height:min(200px, 50vh);
+  margin:clamp(40px, 15vh, 100px) auto 20px;
   border-radius:20px;
   background:#ff2d55;
   position:relative;
@@ -33,16 +43,18 @@ html,body{
   align-items:center;
   justify-content:center;
   color:white;
-  font-size:26px;
+  font-size:clamp(20px, 5vw, 26px);
   font-weight:bold;
   padding:20px;
   text-align:center;
+  line-height:1.4;
 }
 canvas#scratch{
   position:absolute;
   inset:0;
   border-radius:20px;
   cursor:crosshair;
+  touch-action:none;
 }
 
 /* ---------- Buttons ---------- */
@@ -176,7 +188,7 @@ button:hover{
 
 <body>
 
-<h2 id="instruction">Scratch to reveal message </h2>
+<h2 id="instruction">Scratch to reveal your message 💌</h2>
 <p class="progress-text">Use your finger or mouse to scratch!</p>
 
 <div id="card">
@@ -185,7 +197,7 @@ button:hover{
 </div>
 
 <div id="choices" class="hidden">
-  <p style="font-size:18px;margin:20px;">⚠️ Your response will be sent to WhatsApp 💌</p>
+  <p style="font-size:18px;margin:20px;">What's your answer? 💭</p>
   <button class="yes" onclick="handleYes()">Yes 💖</button>
   <button class="no" id="noBtn">No 😈</button>
 </div>
@@ -197,17 +209,20 @@ button:hover{
 /* ---------- Scratch Logic ---------- */
 const canvas=document.getElementById("scratch");
 const ctx=canvas.getContext("2d");
-canvas.width=320; 
-canvas.height=200;
+const card=document.getElementById("card");
+
+// Set canvas size to match card
+canvas.width=card.offsetWidth;
+canvas.height=card.offsetHeight;
 
 // Create silver scratch coating
 ctx.fillStyle="#c0c0c0";
-ctx.fillRect(0,0,320,200);
+ctx.fillRect(0,0,canvas.width,canvas.height);
 
 // Add some texture
 ctx.fillStyle="#d3d3d3";
 for(let i=0;i<100;i++){
-  ctx.fillRect(Math.random()*320, Math.random()*200, 2, 2);
+  ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
 }
 
 let cleared=0, drawing=false;
@@ -223,17 +238,22 @@ canvas.onmousemove=e=>{
 };
 
 // Touch events for mobile
-canvas.ontouchstart=e=>{
+canvas.addEventListener('touchstart', e=>{
   e.preventDefault();
   drawing=true;
-};
-canvas.ontouchend=()=>drawing=false;
-canvas.ontouchmove=e=>{
+}, {passive: false});
+
+canvas.addEventListener('touchend', e=>{
+  e.preventDefault();
+  drawing=false;
+}, {passive: false});
+
+canvas.addEventListener('touchmove', e=>{
   e.preventDefault();
   if(!drawing)return;
   const touch=e.touches[0];
   scratch(touch.clientX, touch.clientY);
-};
+}, {passive: false});
 
 function scratch(x, y){
   const r=canvas.getBoundingClientRect();
@@ -268,7 +288,7 @@ noBtn.onclick=()=>{
       <h2 style="color:#ff2d55;">Abongile ungiceda umoya mama 🥺</h2>
       <p>Please, just one chance?</p>
       <button class="yes" onclick="handleYes()">Fine, we can go on a date 💞</button>
-      <button class="no" onclick="send('Not happening mfo 😭')">Not happening mfo</button>
+      <button class="no" onclick="sendRejection()">Not happening mfo</button>
     `;
   }
 };
@@ -282,7 +302,6 @@ function moveNo(){
 
 /* ---------- YES FLOW ---------- */
 function handleYes(){
-  vibrateLove();
   spawnCelebrationHearts();
   
   document.body.innerHTML=`
@@ -303,6 +322,8 @@ function handleYes(){
 
 /* ---------- Calendar ---------- */
 function showCalendar(){
+  vibrateLove(); // Vibrate "I Love You" when they choose to set a date
+  
   document.body.innerHTML=`
     <canvas id="starfield"></canvas>
     <div id="calendar-container">
@@ -341,6 +362,7 @@ function showCalendar(){
 
 function showConfirmation(date){
   const now=new Date().toLocaleString();
+  const noMessage = noCount > 0 ? ` (She clicked "No" ${noCount} time${noCount > 1 ? 's' : ''} before saying yes! 😅)` : '';
   
   document.body.innerHTML=`
     <canvas id="starfield"></canvas>
@@ -356,15 +378,18 @@ function showConfirmation(date){
     spawnCelebrationHearts();
   }, 10);
   
-  // Send to WhatsApp with date
+  // Send to WhatsApp with date and no click count
   setTimeout(()=>{
-    send(`Abongile said YES! ❤️ Our date is set for ${date}, 2026 💕 (${now})`);
+    send(`Abongile said YES! ❤️ Our date is set for ${date}, 2026 💕${noMessage} (${now})`);
   }, 1500);
 }
 
 /* ---------- Skip Date - Show Kissing Hearts ---------- */
 function skipDate(){
+  vibrateLove(); // Vibrate "I Love You" when they choose maybe later
+  
   const now=new Date().toLocaleString();
+  const noMessage = noCount > 0 ? ` (She clicked "No" ${noCount} time${noCount > 1 ? 's' : ''} before saying yes! 😅)` : '';
   
   document.body.innerHTML=`
     <div id="kissing-hearts">
@@ -378,9 +403,9 @@ function skipDate(){
     </div>
   `;
   
-  // Send message to WhatsApp
+  // Send message to WhatsApp with no click count
   setTimeout(()=>{
-    send(`Abongile said YES! ❤️ We'll set the date later 💕 (${now})`);
+    send(`Abongile said YES! ❤️ We'll set the date later 💕${noMessage} (${now})`);
   }, 2000);
   
   // Remove animation after 5 seconds and show option
@@ -399,9 +424,16 @@ function skipDate(){
   }, 5000);
 }
 
+/* ---------- Send Rejection ---------- */
+function sendRejection(){
+  const now=new Date().toLocaleString();
+  send(`She said NO 😭 (Clicked "No" ${noCount} times!) - ${now}`);
+}
+
 /* ---------- WhatsApp ---------- */
 function send(msg){
-  window.location.href=`https://wa.me/27646551216?text=${encodeURIComponent(msg)}`;
+  const url=`https://wa.me/27646551216?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
 }
 
 /* ---------- Starfield Animation ---------- */
@@ -469,7 +501,7 @@ function spawnCelebrationHearts(){
     setTimeout(()=>{
       const h=document.createElement("div");
       h.className="heart";
-      h.innerText=["❤️","🌷","💖","🌷","💝"][Math.floor(Math.random()*5)];
+      h.innerText=["❤️","💕","💖","💗","💝"][Math.floor(Math.random()*5)];
       h.style.left=Math.random()*100+"vw";
       h.style.animationDuration=(4+Math.random()*3)+"s";
       document.body.appendChild(h);
@@ -478,10 +510,116 @@ function spawnCelebrationHearts(){
   }
 }
 
-/* ---------- Vibrate I LOVE YOU ---------- */
-function vibrateLove(){
+/* ---------- Vibrate and Flash I LOVE YOU ---------- */
+async function vibrateLove(){
+  // Vibrate pattern for "I LOVE YOU"
   if(navigator.vibrate){
     navigator.vibrate([200,100,200,100,600,100,200,100,200]);
+  }
+  
+  // Flash the phone's flashlight in "I LOVE YOU" pattern
+  flashTorch();
+  
+  // Flash "I LOVE YOU" message on screen
+  const flash = document.createElement('div');
+  flash.style.cssText = `
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: bold;
+    color: #ff2d55;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 9999;
+    animation: flashLove 1.3s ease-in-out;
+    pointer-events: none;
+  `;
+  flash.innerHTML = '💖 I LOVE YOU 💖';
+  
+  // Add animation keyframes if not already added
+  if(!document.getElementById('flash-love-style')){
+    const style = document.createElement('style');
+    style.id = 'flash-love-style';
+    style.textContent = `
+      @keyframes flashLove {
+        0%, 100% { opacity: 0; transform: scale(0.5); }
+        15%, 85% { opacity: 1; transform: scale(1); }
+        30% { transform: scale(1.1); }
+        50% { transform: scale(1); color: #ff2d55; }
+        65% { transform: scale(1.05); color: #ff1744; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  document.body.appendChild(flash);
+  
+  // Remove flash message after animation
+  setTimeout(() => {
+    flash.remove();
+  }, 1300);
+}
+
+/* ---------- Flashlight Torch Flash ---------- */
+async function flashTorch(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+    
+    const track = stream.getVideoTracks()[0];
+    
+    // Check if torch is supported
+    const capabilities = track.getCapabilities();
+    if (!capabilities.torch) {
+      console.log('Torch not supported on this device');
+      track.stop();
+      return;
+    }
+    
+    // Flash pattern matching "I LOVE YOU" vibration timing
+    // [200ms ON, 100ms OFF, 200ms ON, 100ms OFF, 600ms ON, 100ms OFF, 200ms ON, 100ms OFF, 200ms ON]
+    const flashPattern = [
+      { on: 200, off: 100 },  // I
+      { on: 200, off: 100 },  // LOVE (first part)
+      { on: 600, off: 100 },  // LOVE (long)
+      { on: 200, off: 100 },  // YOU (first part)
+      { on: 200, off: 0 }     // YOU (end)
+    ];
+    
+    let delay = 0;
+    for(let i = 0; i < flashPattern.length; i++){
+      const pattern = flashPattern[i];
+      
+      setTimeout(async () => {
+        // Turn on torch
+        await track.applyConstraints({
+          advanced: [{ torch: true }]
+        });
+        
+        // Turn off torch after 'on' duration
+        setTimeout(async () => {
+          await track.applyConstraints({
+            advanced: [{ torch: false }]
+          });
+          
+          // Clean up after last flash
+          if (i === flashPattern.length - 1) {
+            setTimeout(() => {
+              track.stop();
+              stream.getTracks().forEach(t => t.stop());
+            }, 100);
+          }
+        }, pattern.on);
+      }, delay);
+      
+      delay += pattern.on + pattern.off;
+    }
+  } catch (err) {
+    console.log('Flashlight not available:', err);
+    // Flashlight not available or permission denied, continue without it
   }
 }
 </script>
