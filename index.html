@@ -510,116 +510,11 @@ function spawnCelebrationHearts(){
   }
 }
 
-/* ---------- Vibrate and Flash I LOVE YOU ---------- */
-async function vibrateLove(){
+/* ---------- Vibrate I LOVE YOU ---------- */
+function vibrateLove(){
   // Vibrate pattern for "I LOVE YOU"
   if(navigator.vibrate){
     navigator.vibrate([200,100,200,100,600,100,200,100,200]);
-  }
-  
-  // Flash the phone's flashlight in "I LOVE YOU" pattern
-  flashTorch();
-  
-  // Flash "I LOVE YOU" message on screen
-  const flash = document.createElement('div');
-  flash.style.cssText = `
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 60px;
-    font-weight: bold;
-    color: #ff2d55;
-    background: rgba(255, 255, 255, 0.95);
-    z-index: 9999;
-    animation: flashLove 1.3s ease-in-out;
-    pointer-events: none;
-  `;
-  flash.innerHTML = '💖 I LOVE YOU 💖';
-  
-  // Add animation keyframes if not already added
-  if(!document.getElementById('flash-love-style')){
-    const style = document.createElement('style');
-    style.id = 'flash-love-style';
-    style.textContent = `
-      @keyframes flashLove {
-        0%, 100% { opacity: 0; transform: scale(0.5); }
-        15%, 85% { opacity: 1; transform: scale(1); }
-        30% { transform: scale(1.1); }
-        50% { transform: scale(1); color: #ff2d55; }
-        65% { transform: scale(1.05); color: #ff1744; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-  
-  document.body.appendChild(flash);
-  
-  // Remove flash message after animation
-  setTimeout(() => {
-    flash.remove();
-  }, 1300);
-}
-
-/* ---------- Flashlight Torch Flash ---------- */
-async function flashTorch(){
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" }
-    });
-    
-    const track = stream.getVideoTracks()[0];
-    
-    // Check if torch is supported
-    const capabilities = track.getCapabilities();
-    if (!capabilities.torch) {
-      console.log('Torch not supported on this device');
-      track.stop();
-      return;
-    }
-    
-    // Flash pattern matching "I LOVE YOU" vibration timing
-    // [200ms ON, 100ms OFF, 200ms ON, 100ms OFF, 600ms ON, 100ms OFF, 200ms ON, 100ms OFF, 200ms ON]
-    const flashPattern = [
-      { on: 500, off: 250 },  // I
-      { on: 500, off: 250 },  // LOVE (first part)
-      { on: 1500, off: 250 },  // LOVE (long)
-      { on: 500, off: 250 },  // YOU (first part)
-      { on: 500, off: 0 }     // YOU (end)
-    ];
-    
-    let delay = 0;
-    for(let i = 0; i < flashPattern.length; i++){
-      const pattern = flashPattern[i];
-      
-      setTimeout(async () => {
-        // Turn on torch
-        await track.applyConstraints({
-          advanced: [{ torch: true }]
-        });
-        
-        // Turn off torch after 'on' duration
-        setTimeout(async () => {
-          await track.applyConstraints({
-            advanced: [{ torch: false }]
-          });
-          
-          // Clean up after last flash
-          if (i === flashPattern.length - 1) {
-            setTimeout(() => {
-              track.stop();
-              stream.getTracks().forEach(t => t.stop());
-            }, 100);
-          }
-        }, pattern.on);
-      }, delay);
-      
-      delay += pattern.on + pattern.off;
-    }
-  } catch (err) {
-    console.log('Flashlight not available:', err);
-    // Flashlight not available or permission denied, continue without it
   }
 }
 </script>
